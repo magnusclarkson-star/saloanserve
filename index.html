@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#046A38">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>SaloneServe — Freetown Super App</title>
+<link rel="manifest" href="manifest.webmanifest">
+<style>
+:root{
+  --green:#046A38; --green-d:#03502B; --blue:#1B5FAA; --orange:#F7941D;
+  --bg:#F4F6F5; --card:#fff; --txt:#1c2420; --muted:#6b7a72; --line:#e3e9e6;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{font-family:'Segoe UI',Roboto,Arial,sans-serif;background:var(--bg);color:var(--txt);max-width:480px;margin:0 auto;min-height:100vh;padding-bottom:76px}
+.top{background:linear-gradient(135deg,var(--green),var(--green-d));color:#fff;padding:18px 16px 22px;border-radius:0 0 22px 22px}
+.top h1{font-size:20px}
+.top .sub{font-size:12px;opacity:.85;margin-top:2px}
+.wallet-chip{display:flex;justify-content:space-between;align-items:center;background:rgba(255,255,255,.15);border-radius:12px;padding:10px 14px;margin-top:14px}
+.wallet-chip b{font-size:18px}
+.view{display:none;padding:14px}
+.view.active{display:block}
+h2{font-size:17px;margin-bottom:10px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.svc{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px 14px;text-align:center;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+.svc .ic{font-size:30px}
+.svc b{display:block;margin-top:8px;font-size:14px}
+.svc span{font-size:11px;color:var(--muted)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:12px}
+label{display:block;font-size:12px;color:var(--muted);margin:10px 0 4px}
+select,input,textarea{width:100%;padding:12px;border:1px solid var(--line);border-radius:10px;font-size:15px;background:#fff}
+.btn{display:block;width:100%;padding:14px;border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;margin-top:14px}
+.btn-green{background:var(--green);color:#fff}
+.btn-orange{background:var(--orange);color:#fff}
+.btn-ghost{background:#eef2f0;color:var(--txt)}
+.row{display:flex;justify-content:space-between;padding:6px 0;font-size:14px}
+.row.total{border-top:1px dashed var(--line);margin-top:6px;padding-top:10px;font-weight:700;font-size:15px}
+.pill{display:inline-block;background:#e8f3ec;color:var(--green);font-size:11px;padding:3px 10px;border-radius:20px;font-weight:600}
+.pill.orange{background:#fdf1e0;color:#b96a00}
+.item{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}
+.item:last-child{border-bottom:none}
+.item b{font-size:14px}.item small{color:var(--muted);display:block}
+.qty button{width:30px;height:30px;border-radius:8px;border:1px solid var(--line);background:#fff;font-size:16px;cursor:pointer}
+.qty span{display:inline-block;width:26px;text-align:center;font-weight:700}
+.bottom-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:#fff;border-top:1px solid var(--line);display:flex;z-index:50}
+.bottom-nav a{flex:1;text-align:center;padding:9px 0 8px;text-decoration:none;color:var(--muted);font-size:10px}
+.bottom-nav a .ni{font-size:20px;display:block}
+.bottom-nav a.on{color:var(--green);font-weight:700}
+.banner{background:#fff7ec;border:1px solid #f5d9a8;color:#8a5a00;font-size:12px;border-radius:12px;padding:10px 12px;margin-bottom:12px}
+.rider{display:flex;gap:12px;align-items:center}
+.rider .av{width:46px;height:46px;border-radius:50%;background:var(--green);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:18px}
+.toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:#222;color:#fff;padding:12px 20px;border-radius:30px;font-size:13px;display:none;z-index:99;max-width:88%;text-align:center}
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;align-items:flex-end;z-index:90}
+.sheet{background:#fff;width:100%;max-width:480px;margin:0 auto;border-radius:22px 22px 0 0;padding:20px;animation:up .25s}
+@keyframes up{from{transform:translateY(60px);opacity:.5}to{transform:translateY(0);opacity:1}}
+.pmeth{display:flex;align-items:center;gap:12px;border:1px solid var(--line);border-radius:12px;padding:13px;margin-top:10px;cursor:pointer}
+.pmeth.sel{border-color:var(--green);background:#f0f8f3}
+.pmeth .lg{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:12px}
+.empty{text-align:center;color:var(--muted);padding:40px 10px;font-size:13px}
+.empty .big{font-size:44px}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <h1>🇸🇱 SaloneServe</h1>
+  <div class="sub">Ride · Pay · Market · Pharmacy — Freetown</div>
+  <div class="wallet-chip" onclick="go('wallet')">
+    <span>💼 Wallet</span><b id="walletBal">SLE 0.00</b>
+  </div>
+</header>
+
+<!-- HOME -->
+<div class="view active" id="v-home">
+  <div class="banner">⚠️ Demo build. No real money moves yet — connect Orange / Africell Money APIs before launch.</div>
+  <div class="grid">
+    <div class="svc" onclick="go('ride')"><div class="ic">🏍️</div><b>Okada Ride</b><span>Book motorbike taxi</span></div>
+    <div class="svc" onclick="go('pay')"><div class="ic">💡</div><b>Bill Pay</b><span>EDSA light & airtime</span></div>
+    <div class="svc" onclick="go('market')"><div class="ic">🧺</div><b>Market Delivery</b><span>From big market</span></div>
+    <div class="svc" onclick="go('pharmacy')"><div class="ic">💊</div><b>Pharmacy</b><span>Meds to your door</span></div>
+    <div class="svc" onclick="go('orders')"><div class="ic">📋</div><b>My Orders</b><span>Track everything</span></div>
+    <div class="svc" onclick="go('rent')"><div class="ic">🏠</div><b>Rentals</b><span>Houses & rooms in Freetown</span></div>
+    <div class="svc" onclick="go('sme')"><div class="ic">📒</div><b>SME Books</b><span>Sales, expenses & invoices</span></div>
+    <div class="svc" onclick="go('remit')"><div class="ic">🌍</div><b>Remittance</b><span>Diaspora pays direct</span></div>
+    <div class="svc" onclick="go('wallet')"><div class="ic">💼</div><b>Wallet</b><span>SLE balance & history</span></div>
+  </div>
+  <div class="card" style="margin-top:14px">
+    <b>Aw di bodi! 👋</b>
+    <p style="font-size:13px;color:var(--muted);margin-top:6px">Everything for Freetown in one app. Book okada, buy light token, order market goods and medicine, find house, manage your shop money, and receive diaspora payments — pay with Orange Money, Africell Money or cash.</p>
+  </div>
+</div>
+
+<!-- RIDE -->
+<div class="view" id="v-ride">
+  <h2>🏍️ Book Okada</h2>
+  <div class="card">
+    <label>Pick up (We yu de?)</label>
+    <select id="rideFrom"></select>
+    <label>Drop off (We yu go?)</label>
+    <select id="rideTo"></select>
+    <div class="row" style="margin-top:10px"><span>Fare estimate</span><b id="rideFare">—</b></div>
+    <button class="btn btn-green" onclick="estimateRide(true)">Find Rider</button>
+  </div>
+  <div id="rideStatus"></div>
+</div>
+
+<!-- PAY -->
+<div class="view" id="v-pay">
+  <h2>💡 Bill Pay</h2>
+  <div class="card">
+    <label>Service</label>
+    <select id="billType" onchange="billUI()">
+      <option value="edsa">EDSA Prepaid Light Token</option>
+      <option value="airtime">Airtime / Data</option>
+    </select>
+    <div id="edsaUI">
+      <label>Meter number</label><input id="meterNo" placeholder="e.g. 04123456789" inputmode="numeric">
+      <label>Amount (SLE)</label><input id="edsaAmt" type="number" placeholder="20" oninput="updBill()">
+    </div>
+    <div id="airUI" style="display:none">
+      <label>Network</label>
+      <select id="airNet"><option>Orange</option><option>Africell</option></select>
+      <label>Phone number</label><input id="airPhone" placeholder="07x xxx xxx" inputmode="tel">
+      <label>Amount (SLE)</label><input id="airAmt" type="number" placeholder="10" oninput="updBill()">
+    </div>
+    <div class="row" style="margin-top:10px"><span>Fee</span><b>SLE 2.00</b></div>
+    <div class="row total"><span>Total</span><span id="billTotal">SLE 2.00</span></div>
+    <button class="btn btn-green" onclick="payBill()">Pay Now</button>
+  </div>
+  <div id="tokenOut"></div>
+</div>
+
+<!-- MARKET -->
+<div class="view" id="v-market">
+  <h2>🧺 Market Delivery</h2>
+  <div class="card">
+    <label>Market</label>
+    <select id="mktName"><option>Kroo Town Road Market</option><option>Congo Market</option><option>Sani Abacha Street</option><option>Big Market, Waterloo</option></select>
+  </div>
+  <div class="card"><b>Pick items</b><div id="mktItems"></div>
+    <div class="row total"><span>Delivery fee</span><span>SLE 30.00</span></div>
+    <div class="row total"><span>Total</span><span id="mktTotal">SLE 30.00</span></div>
+    <button class="btn btn-orange" onclick="orderMarket()">Place Order</button>
+  </div>
+</div>
+
+<!-- PHARMACY -->
+<div class="view" id="v-pharmacy">
+  <h2>💊 Pharmacy</h2>
+  <div class="card">
+    <label>Pharmacy partner</label>
+    <select id="pharm"><option>Capital Pharmacy, Wilkinson Rd</option><option>HealthPlus Pharmacy, Lumley</option><option>Central Pharmacy, Lightfoot Boston</option></select>
+  </div>
+  <div class="card"><b>Common medicines</b><div id="phItems"></div>
+    <div class="row total"><span>Delivery fee</span><span>SLE 25.00</span></div>
+    <div class="row total"><span>Total</span><span id="phTotal">SLE 25.00</span></div>
+    <button class="btn btn-green" onclick="orderPharm()">Order Medicines</button>
+  </div>
+</div>
+
+<!-- ORDERS -->
+<div class="view" id="v-orders">
+  <h2>📋 My Orders</h2>
+  <div id="orderList"></div>
+</div>
+
+<!-- WALLET -->
+<div class="view" id="v-wallet">
+  <h2>💼 Wallet</h2>
+  <div class="card" style="text-align:center;padding:24px">
+    <span style="font-size:12px;color:var(--muted)">AVAILABLE BALANCE</span>
+    <div style="font-size:30px;font-weight:800;color:var(--green)" id="walletBig">SLE 0.00</div>
+    <button class="btn btn-ghost" onclick="mockTopUp()">+ Demo Top-Up (SLE 500)</button>
+  </div>
+  <div class="card"><b>History</b><div id="txList"><div class="empty"><div class="big">🧾</div>No transactions yet</div></div></div>
+</div>
+
+
+<!-- RENTALS -->
+<div class="view" id="v-rent">
+  <h2>🏠 Rentals in Freetown</h2>
+  <div class="card">
+    <label>Area</label>
+    <select id="rentArea" onchange="renderRent()">
+      <option value="">All areas</option><option>Lumley</option><option>Aberdeen</option>
+      <option>Hill Station</option><option>Brookfields</option><option>Kissy</option>
+      <option>Wellington</option><option>Waterloo</option><option>Hastings</option>
+    </select>
+  </div>
+  <div id="rentList"></div>
+  <div class="card">
+    <b>List your property</b> <span class="pill orange">Broker plan SLE 50/mo</span>
+    <label>Title</label><input id="lstTitle" placeholder="e.g. 2-bedroom self-contained, Lumley">
+    <label>Area</label><select id="lstArea"><option>Lumley</option><option>Aberdeen</option><option>Hill Station</option><option>Brookfields</option><option>Kissy</option><option>Wellington</option><option>Waterloo</option><option>Hastings</option></select>
+    <label>Monthly rent (SLE)</label><input id="lstPrice" type="number" placeholder="2500">
+    <label>Contact phone</label><input id="lstPhone" placeholder="07x xxx xxx" inputmode="tel">
+    <button class="btn btn-ghost" onclick="addListing()">Submit Listing (Free trial)</button>
+  </div>
+</div>
+
+<!-- SME BOOKS -->
+<div class="view" id="v-sme">
+  <h2>📒 SME Books</h2>
+  <div class="card" style="text-align:center">
+    <span style="font-size:12px;color:var(--muted)">THIS WEEK (SALES − EXPENSES)</span>
+    <div style="font-size:26px;font-weight:800;color:var(--green)" id="smeNet">SLE 0.00</div>
+    <div class="row" style="margin-top:6px"><span style="color:var(--green)">▲ Sales</span><b id="smeSales">SLE 0.00</b></div>
+    <div class="row"><span style="color:#c0392b">▼ Expenses</span><b id="smeExp">SLE 0.00</b></div>
+  </div>
+  <div class="card">
+    <b>Quick entry</b>
+    <label>Type</label>
+    <select id="smeType"><option value="sale">Sale (money in)</option><option value="exp">Expense (money out)</option></select>
+    <label>Description</label><input id="smeDesc" placeholder="e.g. Sold 2 bags rice / Bought fuel">
+    <label>Amount (SLE)</label><input id="smeAmt" type="number" placeholder="50">
+    <button class="btn btn-green" onclick="addEntry()">Save Entry</button>
+    <div id="smeLog" style="margin-top:8px"></div>
+  </div>
+  <div class="card">
+    <b>Invoices</b>
+    <label>Customer name</label><input id="invCust" placeholder="e.g. Mama Aminata Shop">
+    <label>Item / service</label><input id="invItem" placeholder="e.g. Wholesale rice x10 bags">
+    <label>Amount due (SLE)</label><input id="invAmt" type="number" placeholder="500">
+    <button class="btn btn-orange" onclick="makeInvoice()">Create Invoice</button>
+    <div id="invList" style="margin-top:8px"></div>
+  </div>
+</div>
+
+<!-- REMITTANCE -->
+<div class="view" id="v-remit">
+  <h2>🌍 Diaspora Remittance</h2>
+  <div class="banner">Family abroad pays a school fee, light token or shop bill DIRECT to the merchant — nobody handles cash.</div>
+  <div class="card">
+    <label>Sender (abroad)</label><input id="remSender" placeholder="e.g. Kadijah, London">
+    <label>Recipient in Freetown (name)</label><input id="remRecv" placeholder="e.g. Mohamed Sesay">
+    <label>Recipient phone</label><input id="remPhone" placeholder="07x xxx xxx" inputmode="tel">
+    <label>Pay for</label>
+    <select id="remPurpose">
+      <option>School fees</option><option>EDSA light token</option><option>Groceries</option>
+      <option>Medical / pharmacy</option><option>Rent contribution</option>
+    </select>
+    <label>Merchant / school (we verify before paying out)</label>
+    <input id="remMerchant" placeholder="e.g. St. Joseph's Secondary School">
+    <label>Amount (SLE)</label><input id="remAmt" type="number" placeholder="300" oninput="updRemit()">
+    <div class="row"><span>Our fee (2.5%)</span><b id="remFee">SLE 0.00</b></div>
+    <div class="row total"><span>Total to send</span><span id="remTotal">SLE 0.00</span></div>
+    <button class="btn btn-green" onclick="sendRemit()">Send & Generate Voucher</button>
+  </div>
+  <div id="remitOut"></div>
+</div>
+
+<nav class="bottom-nav">
+  <a href="#" class="on" data-v="home" onclick="go('home');return false"><span class="ni">🏠</span>Home</a>
+  <a href="#" data-v="ride" onclick="go('ride');return false"><span class="ni">🏍️</span>Ride</a>
+  <a href="#" data-v="pay" onclick="go('pay');return false"><span class="ni">💡</span>Pay</a>
+  <a href="#" data-v="orders" onclick="go('orders');return false"><span class="ni">📋</span>Orders</a>
+  <a href="#" data-v="wallet" onclick="go('wallet');return false"><span class="ni">💼</span>Wallet</a>
+</nav>
+
+<div class="overlay" id="ov"><div class="sheet" id="sheet"></div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+// ---------- Data ----------
+const PLACES = {
+  "Lumley":      {x:8.427,y:-13.291},
+  "Aberdeen":    {x:8.486,y:-13.281},
+  "Hill Station":{x:8.449,y:-13.259},
+  "Congo Cross": {x:8.459,y:-13.267},
+  "Murray Town": {x:8.473,y:-13.269},
+  "Central (Downtown)": {x:8.485,y:-13.231},
+  "Brookfields": {x:8.467,y:-13.222},
+  "Upgun":       {x:8.453,y:-13.220},
+  "Kissy":       {x:8.438,y:-13.213},
+  "Wellington":  {x:8.424,y:-13.198}
+};
+const RIDERS = [
+  {n:"Alusine Kamara", p:"SLE 4521 A", r:4.8, trips:1204},
+  {n:"Ibrahim Sesay",  p:"SLE 8834 B", r:4.9, trips:2310},
+  {n:"Mohamed Conteh", p:"SLE 1177 C", r:4.7, trips:876},
+  {n:"Sahr Bangura",   p:"SLE 6602 D", r:4.9, trips:1988}
+];
+const MKT_GOODS = [
+  {n:"Rice (50kg bag)", p:1850},{n:"Palm oil (1L)", p:35},{n:"Cassava (bundle)", p:25},
+  {n:"Fish (bonga, 1kg)", p:45},{n:"Gari (4L tin)", p:60},{n:"Pepper & onion set", p:20},
+  {n:"Maggi cubes (pack)", p:15},{n:"Sugar (1kg)", p:28}
+];
+const MEDS = [
+  {n:"Paracetamol 500mg (strip)", p:8},{n:"Artemether/Lumefantrine (malaria)", p:40},
+  {n:"ORS sachets (x4)", p:12},{n:"Amlodipine 5mg (BP)", p:25},
+  {n:"Amoxicillin 250mg (strip)", p:18},{n:"Zinc tablets", p:15}
+];
+
+// ---------- State ----------
+let S = JSON.parse(localStorage.getItem("saloneserve")||"{}");
+S.wallet = S.wallet ?? 200; S.orders = S.orders ?? []; S.tx = S.tx ?? [];
+const save = ()=>localStorage.setItem("saloneserve",JSON.stringify(S));
+const fmt = n=>"SLE "+n.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
+function toast(m){const t=document.getElementById("toast");t.textContent=m;t.style.display="block";setTimeout(()=>t.style.display="none",2600)}
+function sheet(html){document.getElementById("sheet").innerHTML=html;document.getElementById("ov").style.display="flex"}
+document.getElementById("ov").addEventListener("click",e=>{if(e.target.id==="ov")e.target.style.display="none"});
+
+// ---------- Nav ----------
+function go(v){
+  document.querySelectorAll(".view").forEach(x=>x.classList.remove("active"));
+  document.getElementById("v-"+v).classList.add("active");
+  document.querySelectorAll(".bottom-nav a").forEach(a=>a.classList.toggle("on",a.dataset.v===v));
+  if(v==="orders")renderOrders();
+  if(v==="wallet")renderWallet();
+  if(v==="rent")renderRent();
+  if(v==="sme")renderSME();
+  if(v==="remit")updRemit();
+  window.scrollTo(0,0);
+}
+
+// ---------- Wallet ----------
+function renderWallet(){
+  document.getElementById("walletBal").textContent=fmt(S.wallet);
+  document.getElementById("walletBig").textContent=fmt(S.wallet);
+  const tl=document.getElementById("txList");
+  tl.innerHTML = S.tx.length? S.tx.slice().reverse().map(t=>
+    `<div class="item"><div><b>${t.d}</b><small>${t.dt}</small></div><b style="color:${t.a<0?'#c0392b':'var(--green)'}">${t.a<0?'−':'+'} ${fmt(Math.abs(t.a))}</b></div>`).join("")
+    : `<div class="empty"><div class="big">🧾</div>No transactions yet</div>`;
+}
+function addTx(d,a){S.tx.push({d,a,dt:new Date().toLocaleString()});save();renderWallet()}
+function mockTopUp(){S.wallet+=500;addTx("Demo top-up",500);toast("Wallet topped up +SLE 500")}
+
+// ---------- Payment sheet ----------
+function paySheet(total, onDone){
+  sheet(`<h2 style="margin-bottom:4px">Pay ${fmt(total)}</h2>
+    <p style="font-size:12px;color:var(--muted)">Choose payment method</p>
+    <div class="pmeth" onclick="selectPM(this)"><div class="lg" style="background:#F7941D">OM</div><div><b>Orange Money</b><br><small style="color:var(--muted)">*144# prompt</small></div></div>
+    <div class="pmeth" onclick="selectPM(this)"><div class="lg" style="background:#D32F2F">AM</div><div><b>Africell Money</b><br><small style="color:var(--muted)">*161# prompt</small></div></div>
+    <div class="pmeth" onclick="selectPM(this)"><div class="lg" style="background:#7B1FA2">QM</div><div><b>QCell Money</b><br><small style="color:var(--muted)">*303# prompt</small></div></div>
+    <div class="pmeth" onclick="selectPM(this)"><div class="lg" style="background:#555">💵</div><div><b>Cash on delivery</b><br><small style="color:var(--muted)">Pay the rider / agent</small></div></div>
+    <button class="btn btn-green" onclick="confirmPay(${total})">Confirm Payment</button>`);
+  window._onDone = onDone; window._total = total;
+}
+function selectPM(el){document.querySelectorAll(".pmeth").forEach(p=>p.classList.remove("sel"));el.classList.add("sel")}
+function confirmPay(total){
+  const sel=document.querySelector(".pmeth.sel");
+  if(!sel){toast("Pick a payment method");return}
+  document.getElementById("ov").style.display="none";
+  window._onDone(sel.textContent.includes("Cash")?"Cash":sel.textContent.trim().split("\n")[0]);
+}
+
+// ---------- Rides ----------
+function dist(a,b){const A=PLACES[a],B=PLACES[b];return Math.sqrt((A.x-B.x)**2+(A.y-B.y)**2)*111}
+function calcFare(a,b){return Math.max(15,Math.round(dist(a,b)*12+10))}
+function initRide(){
+  const opts=Object.keys(PLACES).map(p=>`<option>${p}</option>`).join("");
+  document.getElementById("rideFrom").innerHTML=opts;
+  document.getElementById("rideTo").innerHTML=opts;
+  document.getElementById("rideTo").selectedIndex=1;
+  document.getElementById("rideFrom").onchange=()=>estimateRide(false);
+  document.getElementById("rideTo").onchange=()=>estimateRide(false);
+  estimateRide(false);
+}
+function estimateRide(book){
+  const f=document.getElementById("rideFrom").value, t=document.getElementById("rideTo").value;
+  if(f===t){document.getElementById("rideFare").textContent="Pick different places";return}
+  const fare=calcFare(f,t);
+  document.getElementById("rideFare").textContent=fmt(fare);
+  if(book){
+    const st=document.getElementById("rideStatus");
+    st.innerHTML=`<div class="card" style="text-align:center">🔎 <b>Finding rider near ${f}…</b></div>`;
+    setTimeout(()=>{
+      const r=RIDERS[Math.floor(Math.random()*RIDERS.length)];
+      st.innerHTML=`<div class="card">
+        <div class="rider"><div class="av">${r.n.split(" ").map(w=>w[0]).join("")}</div>
+        <div style="flex:1"><b>${r.n}</b><br><small style="color:var(--muted)">⭐ ${r.r} · ${r.trips} trips · Bike ${r.p}</small></div>
+        <span class="pill">2 min away</span></div>
+        <div class="row" style="margin-top:8px"><span>${f} → ${t}</span><b>${fmt(fare)}</b></div>
+        <button class="btn btn-orange" onclick="paySheet(${fare},pm=>finishRide(${JSON.stringify(fare)},'${f}','${t}','${r.n}',pm))">Confirm Ride</button>
+      </div>`;
+    },1600);
+  }
+}
+function finishRide(fare,f,t,rider,pm){
+  if(pm!=="Cash"){if(S.wallet<fare){toast("Wallet low — use Cash or top up");return}S.wallet-=fare;addTx(`Okada: ${f} → ${t}`,-fare)}
+  S.orders.push({id:"SS"+Date.now().toString().slice(-6),type:"Okada Ride",desc:`${f} → ${t} · ${rider}`,amt:fare,pm,dt:new Date().toLocaleString(),st:"Rider on the way 🏍️"});
+  save(); toast("Ride booked! "+rider+" is coming"); renderOrders();
+  document.getElementById("rideStatus").innerHTML=`<div class="card" style="text-align:center">✅ <b>Ride confirmed!</b><br><small style="color:var(--muted)">${rider} · ${pm==='Cash'?'Pay cash to rider':'Paid from wallet'}</small></div>`;
+}
+
+// ---------- Bills ----------
+function billUI(){
+  const t=document.getElementById("billType").value;
+  document.getElementById("edsaUI").style.display=t==="edsa"?"block":"none";
+  document.getElementById("airUI").style.display=t==="airtime"?"block":"none";
+  updBill();
+}
+function updBill(){
+  const t=document.getElementById("billType").value;
+  const amt=parseFloat(document.getElementById(t==="edsa"?"edsaAmt":"airAmt").value)||0;
+  document.getElementById("billTotal").textContent=fmt(amt+2);
+}
+function payBill(){
+  const t=document.getElementById("billType").value;
+  const amt=parseFloat(document.getElementById(t==="edsa"?"edsaAmt":"airAmt").value)||0;
+  if(amt<1){toast("Enter an amount");return}
+  const total=amt+2;
+  const desc = t==="edsa" ? `EDSA token · meter ${document.getElementById("meterNo").value||"—"}` : `${document.getElementById("airNet").value} airtime · ${document.getElementById("airPhone").value||"—"}`;
+  paySheet(total,pm=>{
+    if(pm!=="Cash"){if(S.wallet<total){toast("Wallet low");return}S.wallet-=total;addTx(desc,-total)}
+    S.orders.push({id:"SS"+Date.now().toString().slice(-6),type:"Bill Pay",desc,amt:total,pm,dt:new Date().toLocaleString(),st:"Completed ✅"});
+    save();
+    let extra="";
+    if(t==="edsa"){const tok=Array.from({length:4},()=>Math.floor(1000+Math.random()*9000)).join("-");extra=`<div class="card" style="text-align:center"><small style="color:var(--muted)">YOUR LIGHT TOKEN</small><div style="font-size:22px;font-weight:800;letter-spacing:2px;color:var(--blue)">${tok}</div><small>Type this on your meter keypad</small></div>`}
+    document.getElementById("tokenOut").innerHTML=extra;
+    toast("Payment successful!");renderOrders();
+  });
+}
+
+// ---------- Market & Pharmacy ----------
+let cart={};
+function itemRow(cat,i,it){
+  cart[cat+":"+i]=cart[cat+":"+i]||0;
+  return `<div class="item"><div><b>${it.n}</b><small>${fmt(it.p)} each</small></div>
+    <div class="qty"><button onclick="bump('${cat}',${i},-1,${it.p})">−</button><span id="q-${cat}-${i}">0</span><button onclick="bump('${cat}',${i},1,${it.p})">+</button></div></div>`;
+}
+function bump(cat,i,d,p){
+  const k=cat+":"+i; cart[k]=Math.max(0,(cart[k]||0)+d);
+  document.getElementById("q-"+cat+"-"+i).textContent=cart[k];
+  const list = cat==="mkt"?MKT_GOODS:MEDS, fee = cat==="mkt"?30:25;
+  const sub=list.reduce((s,it,j)=>s+(cart[cat+":"+j]||0)*it.p,0);
+  document.getElementById(cat==="mkt"?"mktTotal":"phTotal").textContent=fmt(sub+fee);
+}
+function orderFrom(cat){
+  const list=cat==="mkt"?MKT_GOODS:MEDS, fee=cat==="mkt"?30:25;
+  const items=list.filter((_,j)=>cart[cat+":"+j]>0).map((it,j)=>({...it,qty:cart[cat+":"+list.indexOf(it)]}));
+  if(!items.length){toast("Pick at least one item");return}
+  const sub=list.reduce((s,it,j)=>s+(cart[cat+":"+j]||0)*it.p,0), total=sub+fee;
+  const where = cat==="mkt"?document.getElementById("mktName").value:document.getElementById("pharm").value;
+  const desc = items.map(it=>`${it.qty}× ${it.n}`).join(", ").slice(0,60)+"…";
+  paySheet(total,pm=>{
+    if(pm!=="Cash"){if(S.wallet<total){toast("Wallet low");return}S.wallet-=total;addTx((cat==="mkt"?"Market":"Pharmacy")+" order",-total)}
+    S.orders.push({id:"SS"+Date.now().toString().slice(-6),type:cat==="mkt"?"Market Delivery":"Pharmacy",desc:`${where} · ${desc}`,amt:total,pm,dt:new Date().toLocaleString(),st:"Being prepared 🛵"});
+    save(); toast("Order placed!"); list.forEach((_,j)=>{cart[cat+":"+j]=0;const q=document.getElementById("q-"+cat+"-"+j);if(q)q.textContent=0});
+    document.getElementById(cat==="mkt"?"mktTotal":"phTotal").textContent=fmt(fee);
+    renderOrders();
+  });
+}
+const orderMarket=()=>orderFrom("mkt"), orderPharm=()=>orderFrom("ph");
+
+// ---------- Orders ----------
+function renderOrders(){
+  const el=document.getElementById("orderList");
+  el.innerHTML = S.orders.length? S.orders.slice().reverse().map(o=>
+    `<div class="card"><div class="row"><b>${o.type}</b><span class="pill orange">${o.id}</span></div>
+     <p style="font-size:13px;margin:6px 0">${o.desc}</p>
+     <div class="row"><small style="color:var(--muted)">${o.dt} · ${o.pm}</small><b>${fmt(o.amt)}</b></div>
+     <div class="row"><span class="pill">${o.st}</span></div></div>`).join("")
+   : `<div class="empty"><div class="big">📭</div>No orders yet — book a ride or buy a light token!</div>`;
+}
+
+
+// ---------- Rentals ----------
+const SEED_LISTINGS = [
+  {t:"2-bedroom self-contained, fenced compound", a:"Lumley", p:3500, ph:"076 123 456", tag:"New"},
+  {t:"Single room, shared compound, water & light", a:"Brookfields", p:900, ph:"077 654 321"},
+  {t:"3-bedroom house, 2 baths, garage", a:"Hill Station", p:5500, ph:"078 111 222", tag:"Verified"},
+  {t:"Shop + living space, main road frontage", a:"Kissy", p:1500, ph:"076 333 444"},
+  {t:"1-bedroom flat, gated estate", a:"Aberdeen", p:4200, ph:"077 555 666", tag:"Verified"},
+  {t:"2-bedroom, WASH facilities, near junction", a:"Wellington", p:1400, ph:"078 777 888"},
+  {t:"New 2-bedroom, tiled, BQ", a:"Waterloo", p:1800, ph:"076 999 000", tag:"New"}
+];
+function listings(){return (S.listings||[]).concat(SEED_LISTINGS)}
+function renderRent(){
+  const f=document.getElementById("rentArea").value;
+  const L=listings().filter(l=>!f||l.a===f);
+  document.getElementById("rentList").innerHTML = L.map((l,i)=>
+    `<div class="card"><div class="row"><b style="font-size:14px">${l.t}</b>${l.tag?`<span class="pill">${l.tag}</span>`:""}</div>
+     <small style="color:var(--muted)">📍 ${l.a}, Freetown</small>
+     <div class="row" style="margin-top:4px"><b style="color:var(--green)">${fmt(l.p)} / month</b>
+     <a href="tel:${l.ph.replace(/\\s/g,"")}" style="color:var(--blue);font-weight:700;text-decoration:none">📞 ${l.ph}</a></div>
+     <button class="btn btn-ghost" style="margin-top:8px;padding:10px" onclick="S.orders.push({id:'SS'+Date.now().toString().slice(-6),type:'Rental Enquiry',desc:l.t+' · '+l.a,amt:0,pm:'—',dt:new Date().toLocaleString(),st:'Agent will call you 📞'});save();renderOrders();toast('Enquiry sent to agent!')">Request Viewing</button></div>`
+  ).join("") || `<div class="empty"><div class="big">🏠</div>No listings in this area yet</div>`;
+}
+function addListing(){
+  const t=document.getElementById("lstTitle").value.trim(), p=parseFloat(document.getElementById("lstPrice").value),
+        ph=document.getElementById("lstPhone").value.trim(), a=document.getElementById("lstArea").value;
+  if(!t||!p||!ph){toast("Fill all fields");return}
+  S.listings=S.listings||[]; S.listings.unshift({t,a,p,ph,tag:"Yours"});
+  save(); ["lstTitle","lstPrice","lstPhone"].forEach(id=>document.getElementById(id).value="");
+  renderRent(); toast("Listing live! Brokers: SLE 50/mo after trial");
+}
+
+// ---------- SME Books ----------
+function smeWeek(){
+  const wk=6048e5, now=Date.now();
+  return (S.entries||[]).filter(e=>now-e.ts<wk);
+}
+function renderSME(){
+  const E=smeWeek(), sales=E.filter(e=>e.t==="sale").reduce((s,e)=>s+e.a,0),
+        exp=E.filter(e=>e.t==="exp").reduce((s,e)=>s+e.a,0);
+  document.getElementById("smeNet").textContent=fmt(sales-exp);
+  document.getElementById("smeSales").textContent=fmt(sales);
+  document.getElementById("smeExp").textContent=fmt(exp);
+  const log=(S.entries||[]).slice(-8).reverse();
+  document.getElementById("smeLog").innerHTML = log.length? log.map(e=>
+    `<div class="item"><div><b style="color:${e.t==="sale"?'var(--green)':'#c0392b'}">${e.t==="sale"?"▲":"▼"} ${e.d}</b><small>${new Date(e.ts).toLocaleDateString()}</small></div><b>${fmt(e.a)}</b></div>`).join("") : `<div class="empty" style="padding:16px">No entries yet — start with today's sales</div>`;
+  const inv=(S.invoices||[]).slice().reverse();
+  document.getElementById("invList").innerHTML = inv.length? inv.map((v,i)=>
+    `<div class="item"><div><b>${v.c}</b><small>${v.i} · due ${new Date(v.ts).toLocaleDateString()}</small></div>
+     <div style="text-align:right"><b>${fmt(v.a)}</b><br><a href="#" onclick="payInvoice(${inv.length-1-i});return false" style="font-size:12px;color:var(--green);font-weight:700">${v.paid?"✅ Paid":"Mark paid →"}</a></div></div>`).join("")
+    : `<div class="empty" style="padding:16px">No invoices yet</div>`;
+}
+function addEntry(){
+  const d=document.getElementById("smeDesc").value.trim(), a=parseFloat(document.getElementById("smeAmt").value),
+        t=document.getElementById("smeType").value;
+  if(!d||!a){toast("Add description and amount");return}
+  S.entries=S.entries||[]; S.entries.push({t,d,a,ts:Date.now()}); save();
+  ["smeDesc","smeAmt"].forEach(id=>document.getElementById(id).value="");
+  renderSME(); toast((t==="sale"?"Sale":"Expense")+" saved");
+}
+function makeInvoice(){
+  const c=document.getElementById("invCust").value.trim(), i=document.getElementById("invItem").value.trim(),
+        a=parseFloat(document.getElementById("invAmt").value);
+  if(!c||!a){toast("Customer and amount needed");return}
+  S.invoices=S.invoices||[]; S.invoices.push({c,i:i||"—",a,paid:false,ts:Date.now()}); save();
+  ["invCust","invItem","invAmt"].forEach(id=>document.getElementById(id).value="");
+  renderSME(); toast("Invoice created for "+c);
+}
+function payInvoice(idx){
+  const v=S.invoices[idx];
+  paySheet(v.a,pm=>{
+    if(pm!=="Cash"){if(S.wallet<v.a){toast("Wallet low");return}S.wallet-=v.a;addTx("Invoice: "+v.c,-v.a)}
+    v.paid=true; save(); renderSME(); toast("Invoice settled ✅");
+  });
+}
+
+// ---------- Remittance ----------
+function updRemit(){
+  const a=parseFloat(document.getElementById("remAmt").value)||0;
+  document.getElementById("remFee").textContent=fmt(a*0.025);
+  document.getElementById("remTotal").textContent=fmt(a*1.025);
+}
+function sendRemit(){
+  const s=document.getElementById("remSender").value.trim(), r=document.getElementById("remRecv").value.trim(),
+        ph=document.getElementById("remPhone").value.trim(), pur=document.getElementById("remPurpose").value,
+        m=document.getElementById("remMerchant").value.trim(), a=parseFloat(document.getElementById("remAmt").value);
+  if(!s||!r||!ph||!m||!a){toast("Fill all fields");return}
+  const code="SV-"+Array.from({length:3},()=>Math.floor(100+Math.random()*900)).join("-");
+  S.orders.push({id:code,type:"Remittance",desc:`${s} → ${r} (${ph}) · ${pur} @ ${m}`,amt:a*1.025,pm:"Card/Bank (abroad)",dt:new Date().toLocaleString(),st:"Voucher created — awaiting pickup 🎫"});
+  save(); renderOrders();
+  document.getElementById("remitOut").innerHTML=`<div class="card" style="text-align:center">
+    <small style="color:var(--muted)">RECIPIENT VOUCHER CODE</small>
+    <div style="font-size:22px;font-weight:800;letter-spacing:2px;color:var(--blue)">${code}</div>
+    <small>${r} shows this code + ID at <b>${m}</b> to collect. You earn 2.5% (SLE ${(a*0.025).toFixed(2)}).</small></div>`;
+  ["remSender","remRecv","remPhone","remMerchant","remAmt"].forEach(id=>document.getElementById(id).value="");
+  updRemit(); toast("Remittance sent!");
+}
+
+// ---------- Init ----------
+document.getElementById("mktItems").innerHTML=MKT_GOODS.map((it,i)=>itemRow("mkt",i,it)).join("");
+document.getElementById("phItems").innerHTML=MEDS.map((it,i)=>itemRow("ph",i,it)).join("");
+initRide(); renderWallet();
+if("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(()=>{});
+</script>
+</body>
+</html>
